@@ -12,4 +12,4 @@ const app = new ExtendedApp({
   },
 });
 
-new OverwatchSupportStack(app, 'OverwatchSupport', {});
+OverwatchSupportStack.fromContext(app, 'OverwatchSupport');
