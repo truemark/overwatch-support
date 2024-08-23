@@ -31,13 +31,7 @@ export class OverwatchSupportConstruct extends Construct {
       alias: 'Overwatch',
       alertManagerDefinition: fs
         .readFileSync(
-          path.join(
-            __dirname,
-            '..',
-            '..',
-            'support',
-            'alertmanager.yaml'
-          ),
+          path.join(__dirname, '..', '..', 'support', 'alertmanager.yaml'),
           'utf-8'
         )
         .replace(/{{{region}}}/g, Stack.of(this).region)
