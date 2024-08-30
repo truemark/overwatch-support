@@ -14,6 +14,7 @@ import {InstallConstruct} from './install-construct';
 export interface OverwatchSupportStackProps extends ExtendedStackProps {
   readonly primaryRegion?: boolean;
   readonly trustedAccounts: string[];
+  readonly skipAmp?: boolean;
 }
 
 export class OverwatchSupportStack extends ExtendedStack {
@@ -200,23 +201,37 @@ export class OverwatchSupportStack extends ExtendedStack {
       });
     }
 
-    const overwatchSupport = new OverwatchSupportConstruct(this, 'Default');
-    new InstallConstruct(this, 'Install', {
-      workspace: overwatchSupport.workspace,
-    });
+    const overwatchSupport = new OverwatchSupportConstruct(
+      this,
+      'Default',
+      props
+    );
+    // Conditionally create InstallConstruct only if workspace is available
+    if (overwatchSupport.workspace) {
+      new InstallConstruct(this, 'Install', {
+        workspace: overwatchSupport.workspace,
+      });
+    } else {
+      console.warn(
+        'AMP is skipped; skipping the creation of InstallConstruct.'
+      );
+    }
   }
 
   static propsFromContext(app: App): OverwatchSupportStackProps {
     let primaryRegion = app.node.tryGetContext('primaryRegion');
     primaryRegion = primaryRegion === undefined || primaryRegion === 'true';
     let trustedAccounts = app.node.tryGetContext('trustedAccounts');
+
     if (!trustedAccounts) {
       throw new Error('trustedAccounts is required in context');
     }
     trustedAccounts = trustedAccounts.split(',').map((id: string) => id.trim());
+    const skipAmp = app.node.tryGetContext('skipAmp');
     return {
       primaryRegion,
       trustedAccounts,
+      skipAmp,
     };
   }
 
