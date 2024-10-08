@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'node:path';
-import {getOtelConfig} from './otel-collector-config-reader';
+import {getOtelCollectorConfig} from './otel-collector-config-reader';
 
 describe('getOtelConfig', () => {
   const templatePath = path.resolve(
@@ -20,7 +20,7 @@ describe('getOtelConfig', () => {
       ecsPrometheusWriteEndpoint: 'https://ecs.example.com',
     };
 
-    const result = getOtelConfig(configData);
+    const result = getOtelCollectorConfig(configData);
 
     expect(result).toContain('https://example.com');
     expect(result).toContain('https://ecs.example.com');
@@ -32,7 +32,7 @@ describe('getOtelConfig', () => {
       // Missing `ecsPrometheusWriteEndpoint`
     };
 
-    expect(() => getOtelConfig(configData)).toThrow(
+    expect(() => getOtelCollectorConfig(configData)).toThrow(
       'Not all placeholders were replaced.'
     );
   });
@@ -43,7 +43,7 @@ describe('getOtelConfig', () => {
       ecsPrometheusWriteEndpoint: '',
     };
 
-    expect(() => getOtelConfig(configData)).toThrow(
+    expect(() => getOtelCollectorConfig(configData)).toThrow(
       `Not all placeholders were replaced.`
     );
   });
@@ -63,7 +63,7 @@ describe('getOtelConfig', () => {
     fs.renameSync(originalPath, tempPath);
 
     try {
-      expect(() => getOtelConfig(configData)).toThrowError();
+      expect(() => getOtelCollectorConfig(configData)).toThrowError();
     } finally {
       // Restore the original file after the test
       fs.renameSync(tempPath, originalPath);

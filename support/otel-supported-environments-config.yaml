@@ -1,0 +1,30 @@
+version: 0.1
+project:
+  name: overwatch-support
+regions:
+  us-west-2:
+    stages:
+      dev:
+        enabled: true
+        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+      test:
+        enabled: false
+        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+      stage:
+        enabled: false
+        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+      prod:
+        enabled: false
+        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+
+  # Add empty replication regions for non Oregon regions
+  eu-west-1:
+    stages:
+      dev:
+        enabled: false
+        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'

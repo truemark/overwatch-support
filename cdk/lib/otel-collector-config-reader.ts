@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'node:path';
 
-function applyTemplate(template: string, data: Record<string, any>): string {
+function applyTemplate(template: string, data: Record<string, string>): string {
   return template.replace(/\{\{(.*?)}}/g, (_, key) => {
     const trimmedKey = key.trim();
     return data[trimmedKey] !== undefined &&
@@ -17,7 +17,7 @@ function validateTemplate(renderedTemplate: string): boolean {
   return remainingPlaceholders === null;
 }
 
-export function getOtelConfig(configData: {
+export function getOtelCollectorConfig(configData: {
   applicationPrometheusWriteEndpoint?: string;
   ecsPrometheusWriteEndpoint?: string;
 }): string {
