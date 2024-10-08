@@ -6,25 +6,25 @@ regions:
     stages:
       dev:
         enabled: true
-        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
-        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        ecsPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
+        applicationPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
       test:
         enabled: false
-        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
-        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        ecsPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
+        applicationPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
       stage:
         enabled: false
-        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
-        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        ecsPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
+        applicationPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
       prod:
         enabled: false
-        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
-        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        ecsPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
+        applicationPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_OREGON}
 
   # Add empty replication regions for non Oregon regions
   eu-west-1:
     stages:
       dev:
         enabled: false
-        ecsPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
-        applicationPrometheusWriteEndpoint: '${PROMETHEUS_WRITE_ENDPOINT}'
+        ecsPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_DUB}
+        applicationPrometheusWriteEndpoint: ${PROMETHEUS_WRITE_ENDPOINT_DUB}

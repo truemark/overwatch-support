@@ -1,1 +1,30 @@
 # Overwatch Support
+
+## Overview
+
+This project provides support for setting up OpenTelemetry (OTel) configurations for various environments. The configurations are managed using AWS Systems Manager (SSM) Parameters, which allows for centralized and secure management of configuration data.
+
+## Setting Environment Variables for OTel Parameter Consumers
+
+To ensure that the OTel parameter consumers can correctly retrieve and use the configuration data, it is essential to set the following environment variables:
+
+- **`CLUSTER_NAME`**: The name of the ECS cluster.
+- **`SERVICE_NAME`**: The name of the ECS service.
+- **`ENVIRONMENT_NAME`**: The name of the environment (e.g., dev, test, prod).
+- **`REGION`**: The AWS region where the resources are deployed.
+- **`ECS_APPLICATION_LOG_GROUP`**: The log group name for application logs.
+- **`ECS_CONTAINER_INSIGHTS_LOG_GROUP`**: The log group name for ECS container insights logs.
+
+These environment variables are used in the OTel configuration templates to dynamically set values for various parameters, ensuring that the correct configuration is applied based on the environment.
+
+### Example
+
+Here is an example of how to set these environment variables in a shell script:
+
+```sh
+export CLUSTER_NAME=my-cluster
+export SERVICE_NAME=my-service
+export ENVIRONMENT_NAME=dev
+export REGION=us-west-2
+export ECS_APPLICATION_LOG_GROUP=/aws/ecs/my-service/application
+export ECS_CONTAINER_INSIGHTS_LOG_GROUP=/aws/ecs/my-service/container-insights
