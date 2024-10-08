@@ -44,7 +44,7 @@ describe('getOtelConfig', () => {
     };
 
     expect(() => getOtelCollectorConfig(configData)).toThrow(
-      `Not all placeholders were replaced.`
+      'Not all placeholders were replaced.'
     );
   });
 
