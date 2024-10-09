@@ -12,7 +12,6 @@ import {InstallTagFunction} from './install-tag-function';
 import * as path from 'path';
 import * as fs from 'fs';
 import {Stack} from 'aws-cdk-lib';
-import {OtelSsmParameterConstruct} from './otel-ssm-parameter-construct';
 
 /**
  * Handles the creation of primary services used in Overwatch.
@@ -78,9 +77,5 @@ export class OverwatchSupportConstruct extends Construct {
     });
 
     new InstallTagFunction(this, 'InstallTagFunction');
-
-    new OtelSsmParameterConstruct(this, 'OtelSsmParameterConstruct', {
-      region: Stack.of(this).region,
-    });
   }
 }
