@@ -24,10 +24,12 @@ When deploying the `OtelSupportStack` using AWS CDK, it is essential to specify 
 Here is an example of how to run the CDK command with the required context parameters:
 
 ```sh
-cdk deploy OtelSupportStack \
-  -c ecsPrometheusWriteEndpoint=https://example.com/ecs \
-  -c applicationPrometheusWriteEndpoint=https://example.com/app \
-  -c environmentName=dev
+cdk deploy OtelSupport \
+  -c ecsPrometheusWriteEndpoint=https://example.com \
+  -c applicationPrometheusWriteEndpoint=https://examplw.com \
+  -c environmentName=dev \
+  -c primaryRegion=us-east-1 \
+  -c trustedAccounts=acc
 ```
 
 ### (ii) Consuming OTel Parameters
