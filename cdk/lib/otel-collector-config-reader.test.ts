@@ -18,6 +18,11 @@ describe('getOtelConfig', () => {
     const configData = {
       applicationPrometheusWriteEndpoint: 'https://example.com',
       ecsPrometheusWriteEndpoint: 'https://ecs.example.com',
+      environmentName: 'dev',
+      serviceName: 'test-service',
+      clusterName: 'billing-cluster',
+      ecsApplicationLogsNamespace: 'ECS/AWSOTel/Application/1',
+      ecsApplicationLogGroup: '/aws/ecs/application/metrics',
     };
 
     const result = getOtelCollectorConfig(configData);

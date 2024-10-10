@@ -25,11 +25,15 @@ Here is an example of how to run the CDK command with the required context param
 
 ```sh
 cdk deploy OtelSupport \
+  -c primaryRegion=us-east-1 \
+  -c trustedAccounts=acc \
   -c ecsPrometheusWriteEndpoint=https://example.com \
   -c applicationPrometheusWriteEndpoint=https://examplw.com \
+  -c serviceName=test-serive \
   -c environmentName=dev \
-  -c primaryRegion=us-east-1 \
-  -c trustedAccounts=acc
+  -c clusterName=billing-cluster \
+  -c ecsApplicationLogsNamespace=ECS/AWSOTel/Application/1 \
+  -c ecsApplicationLogGroup=/aws/ecs/application/metrics 
 ```
 
 ### (ii) Consuming OTel Parameters

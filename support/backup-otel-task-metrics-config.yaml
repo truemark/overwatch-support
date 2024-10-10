@@ -196,8 +196,8 @@ exporters:
   awsxray:
     index_all_attributes: true
   awsemf/application:
-    namespace: {{ecsApplicationLogsNamespace}}
-    log_group_name: {{ecsApplicationLogGroup}}
+    namespace: ECS/AWSOTel/Application/2
+    log_group_name: ${ECS_APPLICATION_LOG_GROUP}
     dimension_rollup_option: NoDimensionRollup
     resource_to_telemetry_conversion:
       enabled: true
@@ -205,7 +205,7 @@ exporters:
 
   awsemf/ecs:
     namespace: ECS/ContainerInsights
-    log_group_name: /aws/ecs/containerinsights/{ClusterName}/performance
+    log_group_name: ${ECS_CONTAINER_INSIGHTS_LOG_GROUP}
     log_stream_name: "{TaskId}"
     resource_to_telemetry_conversion:
       enabled: true
@@ -231,9 +231,9 @@ exporters:
     resource_to_telemetry_conversion:
       enabled: true
     external_labels:
-      cluster: {{clusterName}}
-      namespace: {{serviceName}}-application
-      instance: {{serviceName}}-{{environmentName}}
+      cluster: ${CLUSTER_NAME}
+      namespace: ${SERVICE_NAME}-application
+      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
 
   prometheusremotewrite/ecs:
     endpoint: {{ecsPrometheusWriteEndpoint}}
@@ -241,9 +241,9 @@ exporters:
       authenticator: sigv4auth
     namespace: "ecs"
     external_labels:
-      cluster: {{clusterName}}
-      namespace: {{serviceName}}-ecs
-      instance: {{serviceName}}-{{environmentName}}
+      cluster: ${CLUSTER_NAME}
+      namespace: ${SERVICE_NAME}-ecs
+      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
 
 service:
   pipelines:

@@ -7,6 +7,10 @@ export interface OtelSupportStackProps extends ExtendedStackProps {
   readonly ecsPrometheusWriteEndpoint: string;
   readonly applicationPrometheusWriteEndpoint: string;
   readonly environmentName: string;
+  readonly serviceName: string;
+  readonly clusterName: string;
+  readonly ecsApplicationLogGroup: string;
+  readonly ecsApplicationLogsNamespace: string;
 }
 
 export class OtelSupportStack extends ExtendedStack {
@@ -17,6 +21,10 @@ export class OtelSupportStack extends ExtendedStack {
         props.applicationPrometheusWriteEndpoint,
       ecsPrometheusWriteEndpoint: props.ecsPrometheusWriteEndpoint,
       environmentName: props.environmentName,
+      serviceName: props.serviceName,
+      clusterName: props.clusterName,
+      ecsApplicationLogsNamespace: props.ecsApplicationLogsNamespace,
+      ecsApplicationLogGroup: props.ecsApplicationLogGroup,
     });
   }
 
@@ -29,6 +37,12 @@ export class OtelSupportStack extends ExtendedStack {
         'ecsPrometheusWriteEndpoint'
       ),
       environmentName: app.node.tryGetContext('environmentName'),
+      serviceName: app.node.tryGetContext('serviceName'),
+      clusterName: app.node.tryGetContext('clusterName'),
+      ecsApplicationLogsNamespace: app.node.tryGetContext(
+        'ecsApplicationLogsNamespace'
+      ),
+      ecsApplicationLogGroup: app.node.tryGetContext('ecsApplicationLogGroup'),
     };
   }
 

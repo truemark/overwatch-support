@@ -14,12 +14,18 @@ function applyTemplate(template: string, data: Record<string, string>): string {
 
 function validateTemplate(renderedTemplate: string): boolean {
   const remainingPlaceholders = renderedTemplate.match(/\{\{(.*?)}}/g);
+  console.log('Found placeholders:', remainingPlaceholders);
   return remainingPlaceholders === null;
 }
 
 export function getOtelCollectorConfig(configData: {
-  applicationPrometheusWriteEndpoint?: string;
-  ecsPrometheusWriteEndpoint?: string;
+  readonly applicationPrometheusWriteEndpoint?: string;
+  readonly ecsPrometheusWriteEndpoint?: string;
+  readonly environmentName?: string;
+  readonly serviceName?: string;
+  readonly clusterName?: string;
+  readonly ecsApplicationLogsNamespace?: string;
+  readonly ecsApplicationLogGroup?: string;
 }): string {
   const yamlTemplate = fs.readFileSync(
     path.resolve(__dirname, '../../support/otel-task-metrics-config.yaml'),
