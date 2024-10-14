@@ -31,8 +31,7 @@
         ],
         "metrics_collection_interval": 60,
         "resources": [
-          "/",
-          "/var"
+          "*"
         ],
         "ignore_file_system_types": [
           "tmpfs",
@@ -53,8 +52,8 @@
       },
       "net": {
         "measurement": [
-          "bytes_in",
-          "bytes_out"
+          "bytes_sent",
+          "bytes_recv"
         ],
         "metrics_collection_interval": 60
       }
