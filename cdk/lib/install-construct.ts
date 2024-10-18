@@ -18,7 +18,13 @@ export class InstallConstruct extends Construct {
 
     // eslint-disable-next-line n/no-unsupported-features/node-builtins
     const nodeExporterServiceConfig = fs.readFileSync(
-      path.join(__dirname, '..', '..', 'support', 'node_exporter.service'),
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        'support',
+        'node_exporter.service'
+      ),
       'utf-8'
     );
     new StringParameter(this, 'NodeExporterServiceConfigParam', {
