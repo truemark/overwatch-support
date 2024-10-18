@@ -196,8 +196,8 @@ exporters:
   awsxray:
     index_all_attributes: true
   awsemf/application:
-    namespace: {{ecsApplicationLogsNamespace}}
-    log_group_name: {{ecsApplicationLogGroup}}
+    namespace: ${ECS_APPLICATION_LOGS_NAMESPACE}
+    log_group_name: ${ECS_APPLICATION_LOG_GROUP}
     dimension_rollup_option: NoDimensionRollup
     resource_to_telemetry_conversion:
       enabled: true
@@ -224,26 +224,26 @@ exporters:
       - metric_name_selectors: [container.*]
 
   prometheusremotewrite/application:
-    endpoint: {{applicationPrometheusWriteEndpoint}}
+    endpoint: ${AWS_PROMETHEUS_ENDPOINT}
     auth:
       authenticator: sigv4auth
     namespace: "adot"
     resource_to_telemetry_conversion:
       enabled: true
     external_labels:
-      cluster: {{clusterName}}
-      namespace: {{serviceName}}-application
-      instance: {{serviceName}}-{{environmentName}}
+      cluster: ${CLUSTER_NAME}
+      namespace: ${SERVICE_NAME}-application
+      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
 
   prometheusremotewrite/ecs:
-    endpoint: {{ecsPrometheusWriteEndpoint}}
+    endpoint: ${AWS_PROMETHEUS_ENDPOINT}
     auth:
       authenticator: sigv4auth
     namespace: "ecs"
     external_labels:
-      cluster: {{clusterName}}
-      namespace: {{serviceName}}-ecs
-      instance: {{serviceName}}-{{environmentName}}
+      cluster: ${CLUSTER_NAME}
+      namespace: ${SERVICE_NAME}-ecs
+      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
 
 service:
   pipelines:

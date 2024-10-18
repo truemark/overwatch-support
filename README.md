@@ -13,11 +13,7 @@ TBA
 - It ensures creation of SSM parameters for OpenTelemetry (OTel) configurations for various environments.
 
 ### (i) Running the CDK for OtelSupport Stack
-When deploying the `OtelSupportStack` using AWS CDK, it is essential to specify the following context parameters to ensure the stack is configured correctly:
-
-- **`ecsPrometheusWriteEndpoint`**: The endpoint for ECS Prometheus write.
-- **`applicationPrometheusWriteEndpoint`**: The endpoint for application Prometheus write.
-- **`environmentName`**: The name of the environment (e.g., dev, test, prod).
+When deploying the `OtelSupport` stack using AWS CDK, it is essential to specify the stack name `OtelSupport` as in the example below:
 
 #### Example Command
 
@@ -26,14 +22,7 @@ Here is an example of how to run the CDK command with the required context param
 ```sh
 cdk deploy OtelSupport \
   -c primaryRegion=us-east-1 \
-  -c trustedAccounts=acc \
-  -c ecsPrometheusWriteEndpoint=https://example.com \
-  -c applicationPrometheusWriteEndpoint=https://examplw.com \
-  -c serviceName=test-serive \
-  -c environmentName=dev \
-  -c clusterName=billing-cluster \
-  -c ecsApplicationLogsNamespace=ECS/AWSOTel/Application/1 \
-  -c ecsApplicationLogGroup=/aws/ecs/application/metrics 
+  -c trustedAccounts=acc 
 ```
 
 ### (ii) Consuming OTel Parameters
@@ -48,7 +37,7 @@ To ensure that the OTel parameter consumers can correctly retrieve and use the c
 - **`ENVIRONMENT_NAME`**: The name of the environment (e.g., dev, test, prod).
 - **`REGION`**: The AWS region where the resources are deployed.
 - **`ECS_APPLICATION_LOG_GROUP`**: The log group name for application logs.
-- **`ECS_CONTAINER_INSIGHTS_LOG_GROUP`**: The log group name for ECS container insights logs.
+- **`ECS_APPLICATION_LOGS_NAMESPACE`**: The CloudWatch Logs namespace for application logs.
 
 These environment variables are used in the OTel configuration templates to dynamically set values for various parameters, ensuring that the correct configuration is applied based on the environment.
 
@@ -62,5 +51,5 @@ export SERVICE_NAME=my-service
 export ENVIRONMENT_NAME=dev
 export REGION=us-west-2
 export ECS_APPLICATION_LOG_GROUP=/aws/ecs/my-service/application
-export ECS_CONTAINER_INSIGHTS_LOG_GROUP=/aws/ecs/my-service/container-insights
+export ECS_APPLICATION_LOGS_NAMESPACE=/aws/ecs/my-service/container-insights
 ```

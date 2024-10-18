@@ -12,9 +12,8 @@ function applyTemplate(template: string, data: Record<string, string>): string {
   });
 }
 
-function validateTemplate(renderedTemplate: string): boolean {
+function isValidTemplate(renderedTemplate: string): boolean {
   const remainingPlaceholders = renderedTemplate.match(/\{\{(.*?)}}/g);
-  console.log('Found placeholders:', remainingPlaceholders);
   return remainingPlaceholders === null;
 }
 
@@ -28,13 +27,13 @@ export function getOtelCollectorConfig(configData: {
   readonly ecsApplicationLogGroup?: string;
 }): string {
   const yamlTemplate = fs.readFileSync(
-    path.resolve(__dirname, '../../support/otel-task-metrics-config.yaml'),
+    path.resolve(__dirname, '../../support/ecs-otel-task-metrics-config.yaml'),
     'utf-8'
   );
 
   const renderedTemplate = applyTemplate(yamlTemplate, configData);
 
-  const isValid = validateTemplate(renderedTemplate);
+  const isValid = isValidTemplate(renderedTemplate);
 
   if (!isValid) {
     throw new Error('Not all placeholders were replaced.');

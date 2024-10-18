@@ -5,7 +5,7 @@ import {getOtelCollectorConfig} from './otel-collector-config-reader';
 describe('getOtelConfig', () => {
   const templatePath = path.resolve(
     __dirname,
-    '../../support/otel-task-metrics-config.yaml'
+    '../../support/ecs-otel-task-metrics-config.yaml'
   );
 
   beforeAll(() => {
@@ -15,53 +15,20 @@ describe('getOtelConfig', () => {
   });
 
   it('should read the real YAML file and render a valid configuration', () => {
-    const configData = {
-      applicationPrometheusWriteEndpoint: 'https://example.com',
-      ecsPrometheusWriteEndpoint: 'https://ecs.example.com',
-      environmentName: 'dev',
-      serviceName: 'test-service',
-      clusterName: 'billing-cluster',
-      ecsApplicationLogsNamespace: 'ECS/AWSOTel/Application/1',
-      ecsApplicationLogGroup: '/aws/ecs/application/metrics',
-    };
+    const configData = {};
 
     const result = getOtelCollectorConfig(configData);
 
-    expect(result).toContain('https://example.com');
-    expect(result).toContain('https://ecs.example.com');
-  });
-
-  it('should throw an error if not all placeholders are replaced', () => {
-    const configData = {
-      applicationPrometheusWriteEndpoint: 'https://example.com',
-      // Missing `ecsPrometheusWriteEndpoint`
-    };
-
-    expect(() => getOtelCollectorConfig(configData)).toThrow(
-      'Not all placeholders were replaced.'
-    );
-  });
-
-  it('should throw an error if no configuration data is provided', () => {
-    const configData = {
-      applicationPrometheusWriteEndpoint: '',
-      ecsPrometheusWriteEndpoint: '',
-    };
-
-    expect(() => getOtelCollectorConfig(configData)).toThrow(
-      'Not all placeholders were replaced.'
-    );
+    expect(result).toContain('${CLUSTER_NAME}');
+    expect(result).toContain('${ENVIRONMENT_NAME}');
   });
 
   it('should throw an error if the file does not exist', () => {
-    const configData = {
-      applicationPrometheusWriteEndpoint: 'https://example.com',
-      ecsPrometheusWriteEndpoint: 'https://ecs.example.com',
-    };
+    const configData = {};
 
     const originalPath = path.resolve(
       __dirname,
-      '../../support/otel-task-metrics-config.yaml'
+      '../../support/ecs-otel-task-metrics-config.yaml'
     );
     const tempPath = `${originalPath}.bak`;
 
