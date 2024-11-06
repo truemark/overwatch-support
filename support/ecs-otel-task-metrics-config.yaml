@@ -1,5 +1,10 @@
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
+    check_collector_pipeline:
+      enabled: true
+      interval: 5m
+      exporter_failure_threshold: 5
   sigv4auth:
     region: ${REGION}
 
@@ -22,7 +27,6 @@ receivers:
 processors:
   resource/otel:
     attributes:
-
       - key: test.inject
         value: "added by resource processor"
         action: insert
@@ -193,6 +197,8 @@ processors:
         action: delete
 
 exporters:
+  logging:
+    loglevel: info
   awsxray:
     index_all_attributes: true
   awsemf/application:
@@ -233,7 +239,7 @@ exporters:
     external_labels:
       cluster: ${CLUSTER_NAME}
       namespace: ${SERVICE_NAME}-application
-      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
+
 
   prometheusremotewrite/ecs:
     endpoint: ${AWS_PROMETHEUS_ENDPOINT}
@@ -243,9 +249,12 @@ exporters:
     external_labels:
       cluster: ${CLUSTER_NAME}
       namespace: ${SERVICE_NAME}-ecs
-      instance: ${SERVICE_NAME}-${ENVIRONMENT_NAME}
+
 
 service:
+  telemetry:
+    logs:
+      level: info
   pipelines:
     traces:
       receivers: [otlp,awsxray]
@@ -254,10 +263,10 @@ service:
     metrics/application:
       receivers: [otlp, statsd]
       processors: [resourcedetection,batch/metrics]
-      exporters: [prometheusremotewrite/application, awsemf/application]
+      exporters: [prometheusremotewrite/application, awsemf/application, logging]
     metrics/ecs:
       receivers: [awsecscontainermetrics]
       processors: [filter, metricstransform, resource]
-      exporters: [prometheusremotewrite/ecs]
+      exporters: [prometheusremotewrite/ecs,logging]
 
   extensions: [health_check,sigv4auth]
