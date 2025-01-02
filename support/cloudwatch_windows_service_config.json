@@ -1,0 +1,56 @@
+{
+  "metrics": {
+    "aggregation_dimensions": [["InstanceId","path"]],
+    "append_dimensions": {
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+      "ImageId": "${aws:ImageId}",
+      "InstanceId": "${aws:InstanceId}",
+      "InstanceType": "${aws:InstanceType}"
+    },
+    "metrics_collected": {
+      "LogicalDisk": {
+        "measurement": [
+          "% Free Space",
+          "Disk Read Bytes/sec",
+          "Disk Write Bytes/sec"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "*"
+        ]
+      },
+      "Memory": {
+        "measurement": [
+          "% Committed Bytes In Use",
+          "Available MBytes"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "Processor": {
+        "measurement": [
+          "% Processor Time"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "*"
+        ]
+      },
+      "Paging File": {
+        "measurement": [
+          "% Usage"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "Network Interface": {
+        "measurement": [
+          "Bytes Received/sec",
+          "Bytes Sent/sec"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "*"
+        ]
+      }
+    }
+  }
+}
