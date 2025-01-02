@@ -17,14 +17,29 @@ export class InstallConstruct extends Construct {
     super(scope, id);
 
     // eslint-disable-next-line n/no-unsupported-features/node-builtins
-    const nodeExporterServiceConfig = fs.readFileSync(
+    const cloudwatchWindowsServiceConfig = fs.readFileSync(
       path.join(
         __dirname,
         '..',
         '..',
         'support',
-        'node_exporter.service'
+        'cloudwatch_windows_service_config.json'
       ),
+      'utf-8'
+    );
+    const cloudwatchLinuxServiceConfig = fs.readFileSync(
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        'support',
+        'cloudwatch_linux_service_config.json'
+      ),
+      'utf-8'
+    );
+    // eslint-disable-next-line n/no-unsupported-features/node-builtins
+    const nodeExporterServiceConfig = fs.readFileSync(
+      path.join(__dirname, '..', '..', 'support', 'node_exporter.service'),
       'utf-8'
     );
     new StringParameter(this, 'NodeExporterServiceConfigParam', {
@@ -32,6 +47,18 @@ export class InstallConstruct extends Construct {
       stringValue: nodeExporterServiceConfig,
       description: 'The Node Exporter service configuration',
     });
+    // Config for cloudwatch agent Windows
+    new StringParameter(this, 'CloudwatchWindowsServiceConfigParam', {
+      parameterName: '/overwatch/cloudwatch-config/Windows-ServiceConfig',
+      stringValue: cloudwatchWindowsServiceConfig,
+      description: 'The Node Exporter service configuration',
+    });
+    new StringParameter(this, 'CloudwatchLinuxServiceConfigParam', {
+      parameterName: '/overwatch/cloudwatch-config/Linux-ServiceConfig',
+      stringValue: cloudwatchLinuxServiceConfig,
+      description: 'The Node Exporter service configuration',
+    });
+    // Config for cloudwatch agent Linux
     // Document for installing windows node exporter
     const documentContent = {
       schemaVersion: '2.2',

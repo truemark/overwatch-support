@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import {Stack} from 'aws-cdk-lib';
 
 /**
- * Handles the creation of primary services used in Overwatch.
+ * Handles the creation of primary services used in Overwatch. (Prometheus,producer and IAM roles)
  */
 export class OverwatchSupportConstruct extends Construct {
   readonly workspace: CfnWorkspace;
@@ -27,17 +27,12 @@ export class OverwatchSupportConstruct extends Construct {
       url: 'https://ingest.centergauge.com/',
     });
 
+    //TODO only for supported regions from Globals
     this.workspace = new CfnWorkspace(this, 'Workspace', {
       alias: 'Overwatch',
       alertManagerDefinition: fs
         .readFileSync(
-          path.join(
-            __dirname,
-            '..',
-            '..',
-            'support',
-            'alertmanager.yaml'
-          ),
+          path.join(__dirname, '..', '..', 'support', 'alertmanager.yaml'),
           'utf-8'
         )
         .replace(/{{{region}}}/g, Stack.of(this).region)

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=prometheus
-ExecStart=/etc/prometheus/node_exporter/node_exporter
+ExecStart=/etc/prometheus/node_exporter/node_exporter --collector.disable-defaults  --collector.cpu --collector.meminfo --collector.filesystem --collector.os
 
 [Install]
 WantedBy=default.target
