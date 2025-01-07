@@ -12,6 +12,7 @@ import {InstallTagFunction} from './install-tag-function';
 import * as path from 'path';
 import * as fs from 'fs';
 import {Stack} from 'aws-cdk-lib';
+import {Alias, IKey} from 'aws-cdk-lib/aws-kms';
 
 /**
  * Handles the creation of primary services used in Overwatch. (Prometheus,producer and IAM roles)
@@ -25,6 +26,7 @@ export class OverwatchSupportConstruct extends Construct {
     const alertsTopic = new AlertsTopic(this, 'AlertsTopic', {
       topicName: 'OverwatchAlerts',
       url: 'https://ingest.centergauge.com/',
+      masterKey: Alias.fromAliasName(this, 'shared', 'alias/shared'),
     });
 
     //TODO only for supported regions from Globals
@@ -38,6 +40,20 @@ export class OverwatchSupportConstruct extends Construct {
         .replace(/{{{region}}}/g, Stack.of(this).region)
         .replace(/{{{alertsTopicArn}}}/g, alertsTopic.topic.topicArn),
     });
+    alertsTopic.topic.addToResourcePolicy(
+      new PolicyStatement({
+        actions: ['SNS:Publish'],
+        resources: [alertsTopic.topic.topicArn],
+        principals: [
+          new ServicePrincipal(`aps.${Stack.of(this).region}.amazonaws.com`),
+        ],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceAccount': `${Stack.of(this).account}`,
+          },
+        },
+      })
+    );
 
     const producerRole = new Role(this, 'OverwatchProducerRole', {
       assumedBy: new ServicePrincipal('ec2.amazonaws.com'),
