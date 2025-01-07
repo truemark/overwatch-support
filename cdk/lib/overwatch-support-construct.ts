@@ -6,6 +6,7 @@ import {
   PolicyStatement,
   Role,
   ServicePrincipal,
+  AnyPrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import {AlertsTopic} from 'truemark-cdk-lib/aws-centergauge';
 import {InstallTagFunction} from './install-tag-function';
@@ -42,11 +43,33 @@ export class OverwatchSupportConstruct extends Construct {
     });
     alertsTopic.topic.addToResourcePolicy(
       new PolicyStatement({
-        actions: ['SNS:Publish'],
+        actions: ['SNS:Publish', 'SNS:GetTopicAttributes'],
         resources: [alertsTopic.topic.topicArn],
         principals: [
           new ServicePrincipal(`aps.${Stack.of(this).region}.amazonaws.com`),
         ],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceAccount': `${Stack.of(this).account}`,
+          },
+        },
+      })
+    );
+    alertsTopic.topic.addToResourcePolicy(
+      new PolicyStatement({
+        actions: [
+          'SNS:Publish',
+          'SNS:GetTopicAttributes',
+          'SNS:SetTopicAttributes',
+          'SNS:AddPermission',
+          'SNS:RemovePermission',
+          'SNS:DeleteTopic',
+          'SNS:Subscribe',
+          'SNS:ListSubscriptionsByTopic',
+          'SNS:Publish',
+        ],
+        resources: [alertsTopic.topic.topicArn],
+        principals: [new AnyPrincipal()],
         conditions: {
           StringEquals: {
             'AWS:SourceAccount': `${Stack.of(this).account}`,
