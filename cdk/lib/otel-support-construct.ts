@@ -14,7 +14,7 @@ export class OtelSupportConstruct extends ExtendedConstruct {
   constructor(scope: Construct, id: string, props: OtelSupportConstructProps) {
     super(scope, id);
 
-    const configContent = getOtelCollectorConfig({});
+    const configContent = getOtelCollectorConfig();
     new StringParameter(this, 'OtelConfigParameter', {
       parameterName: props.parameterName,
       stringValue: configContent,

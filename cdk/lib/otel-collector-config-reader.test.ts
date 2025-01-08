@@ -1,44 +1,41 @@
+import {getOtelCollectorConfig} from './otel-collector-config-reader';
 import * as fs from 'fs';
 import * as path from 'node:path';
-import {getOtelCollectorConfig} from './otel-collector-config-reader';
 
-describe('getOtelConfig', () => {
-  const templatePath = path.resolve(
-    __dirname,
-    '../../support/ecs-otel-task-metrics-config.yaml'
-  );
+jest.mock('fs');
+jest.mock('node:path');
 
-  beforeAll(() => {
-    if (!fs.existsSync(templatePath)) {
-      throw new Error(`Template file not found at path: ${templatePath}`);
-    }
+describe('getOtelCollectorConfig', () => {
+  const mockYamlContent = `
+    exporters:
+      prometheusremotewrite/application:
+        endpoint: \${AWS_PROMETHEUS_ENDPOINT}
+  `;
+
+  beforeEach(() => {
+    (fs.readFileSync as jest.Mock).mockReturnValue(mockYamlContent);
+    (path.resolve as jest.Mock).mockReturnValue('mocked/path/to/yaml');
   });
 
-  it('should read the real YAML file and render a valid configuration', () => {
-    const configData = {};
-
-    const result = getOtelCollectorConfig(configData);
-
-    expect(result).toContain('${CLUSTER_NAME}');
-    expect(result).toContain('${ENVIRONMENT_NAME}');
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should throw an error if the file does not exist', () => {
-    const configData = {};
+  it('should read the YAML file and replace the placeholder with the provided prometheusEndPoint', () => {
+    const prometheusEndPoint = 'http://example.com/prometheus';
+    const result = getOtelCollectorConfig(prometheusEndPoint);
+    expect(result).toContain(`endpoint: ${prometheusEndPoint}`);
+  });
 
-    const originalPath = path.resolve(
-      __dirname,
-      '../../support/ecs-otel-task-metrics-config.yaml'
-    );
-    const tempPath = `${originalPath}.bak`;
+  it('should read the YAML file and return the content without replacement if no prometheusEndPoint is provided', () => {
+    const result = getOtelCollectorConfig();
+    expect(result).toContain('endpoint: ${AWS_PROMETHEUS_ENDPOINT}');
+  });
 
-    fs.renameSync(originalPath, tempPath);
-
-    try {
-      expect(() => getOtelCollectorConfig(configData)).toThrowError();
-    } finally {
-      // Restore the original file after the test
-      fs.renameSync(tempPath, originalPath);
-    }
+  it('should throw an error if the YAML file cannot be read', () => {
+    (fs.readFileSync as jest.Mock).mockImplementation(() => {
+      throw new Error('File not found');
+    });
+    expect(() => getOtelCollectorConfig()).toThrow('File not found');
   });
 });
