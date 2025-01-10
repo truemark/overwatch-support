@@ -9,12 +9,17 @@ import {
 export interface OtelSupportConstructProps extends ExtendedConstructProps {
   readonly parameterName: string;
   readonly parameterDescription: string;
+  readonly region?: string;
+  readonly prometheusEndpoint?: string;
 }
 export class OtelSupportConstruct extends ExtendedConstruct {
   constructor(scope: Construct, id: string, props: OtelSupportConstructProps) {
     super(scope, id);
 
-    const configContent = getOtelCollectorConfig();
+    const configContent = getOtelCollectorConfig(
+      props.region,
+      props.prometheusEndpoint
+    );
     new StringParameter(this, 'OtelConfigParameter', {
       parameterName: props.parameterName,
       stringValue: configContent,

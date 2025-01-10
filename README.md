@@ -26,7 +26,8 @@ Here is an example of how to run the CDK command with the required context param
 ```sh
 cdk deploy OtelSupport \
   -c primaryRegion=us-east-1 \
-  -c trustedAccounts=acc 
+  -c trustedAccounts=acc \
+  -c ampWorkSpaceId=<Prometheus ampWorkSpaceId> 
 ```
 
 This project consists of a CDK project that installs the following components:
