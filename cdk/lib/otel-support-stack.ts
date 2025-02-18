@@ -31,7 +31,7 @@ export class OtelSupportStack extends ExtendedStack {
       throw new Error('ampWorkSpaceId is required in context for OTEL Support');
     }
     return new OtelSupportStack(app, id, {
-      parameterName: '/app/global/otel-config',
+      parameterName: '/app/global/otel',
       parameterDescription: 'Global OpenTelemetry configuration',
       region: app.node.tryGetContext('primaryRegion'),
       ampWorkSpaceId,
