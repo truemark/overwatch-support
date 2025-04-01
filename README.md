@@ -16,16 +16,16 @@ This project provides the below functionalities:
 ## 2. Open Telemetry support
 - It ensures creation of SSM parameters for OpenTelemetry (OTel) configurations for various environments.
 
-### (i) Running the CDK for OtelSupport Stack
-When deploying the `OtelSupport` stack using AWS CDK, it is essential to specify the stack name `OtelSupport` as in the example below:
+### (i) Running the CDK 
+Otel support for the otel collector config ssm parameters is deployed as part of the default `OverwatchSupport` stack.
 
 #### Example Command
 
 Here is an example of how to run the CDK command with the required context parameters:
 
 ```sh
-cdk deploy OtelSupport \
-  -c primaryRegion=us-east-1 \
+cdk deploy \
+  -c primaryRegion=<value-here> \
   -c trustedAccounts=acc \
   -c ampWorkSpaceId=<Prometheus ampWorkSpaceId> 
 ```
