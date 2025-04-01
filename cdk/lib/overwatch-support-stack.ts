@@ -1,7 +1,7 @@
 import {ExtendedStack, ExtendedStackProps} from 'truemark-cdk-lib/aws-cdk';
 import {Construct} from 'constructs';
 import {OverwatchSupportConstruct} from './overwatch-support-construct';
-import {App} from 'aws-cdk-lib';
+import {App, Stack} from 'aws-cdk-lib';
 import {
   AccountPrincipal,
   CompositePrincipal,
@@ -10,6 +10,7 @@ import {
   Role,
 } from 'aws-cdk-lib/aws-iam';
 import {InstallConstruct} from './install-construct';
+import {OtelSupportConstruct} from './otel-support-construct';
 
 export interface OverwatchSupportStackProps extends ExtendedStackProps {
   readonly primaryRegion?: boolean;
@@ -203,6 +204,13 @@ export class OverwatchSupportStack extends ExtendedStack {
     const overwatchSupport = new OverwatchSupportConstruct(this, 'Default');
     new InstallConstruct(this, 'Install', {
       workspace: overwatchSupport.workspace,
+    });
+
+    new OtelSupportConstruct(this, 'OtelSupportConstruct', {
+      parameterName: '/app/global/otel',
+      parameterDescription: 'Global OpenTelemetry configuration',
+      region: Stack.of(this).region,
+      prometheusEndpoint: overwatchSupport.workspace.attrPrometheusEndpoint,
     });
   }
 
