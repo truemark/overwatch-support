@@ -14,6 +14,8 @@ const log = logging.initialize({
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 30000; // 30 seconds
 
+type SSMParameters = {[key: string]: string[]};
+
 async function isInstanceSSMReachable(
   ssmClient: SSMClient,
   instanceId: string,
@@ -86,6 +88,7 @@ export const handler: EventBridgeHandler<string, string, void> = async (
       if (await isInstanceSSMReachable(ssmClient, instanceId!)) {
         const tagValue = event.detail.tags['overwatch:install'];
         const commands: string[] = [];
+        const documentParameters: {[key: string]: SSMParameters} = {};
 
         if (
           tagValue === 'all' ||
@@ -97,20 +100,46 @@ export const handler: EventBridgeHandler<string, string, void> = async (
           commands.push('InstallNodeExporter');
         } else if (tagValue.includes('fluent-bit')) {
           commands.push('InstallFluentBit');
+        } else if (tagValue.includes('cloudwatch-agent')) {
+          commands.push(
+            'AWSEC2-ApplicationInsightsCloudwatchAgentInstallAndConfigure',
+          );
+          documentParameters[
+            'AWSEC2-ApplicationInsightsCloudwatchAgentInstallAndConfigure'
+          ] = {
+            parameterStoreName: [
+              '/overwatch/cloudwatch-config/Linux-ServiceConfig',
+            ],
+          };
         }
 
         for (const commandName of commands) {
-          const command = new SendCommandCommand({
+          // Define commandParams with Parameters as an optional property
+          const commandParams: {
+            DocumentName: string;
+            InstanceIds: string[];
+            Parameters?: SSMParameters; // Making Parameters optional
+          } = {
             DocumentName: commandName,
             InstanceIds: [instanceId],
-          });
+          };
 
-          const response = await ssmClient.send(command);
-          log
-            .trace()
-            .obj('response', response)
-            .str('command', commandName)
-            .msg(`SSM command sent successfully`);
+          if (documentParameters[commandName]) {
+            commandParams.Parameters = documentParameters[commandName];
+          }
+
+          const command = new SendCommandCommand(commandParams);
+
+          try {
+            const response = await ssmClient.send(command);
+            log
+              .trace()
+              .obj('response', response)
+              .str('command', commandName)
+              .msg(`SSM command sent successfully`);
+          } catch (error) {
+            log.error().msg(`Failed to send SSM command: `);
+          }
         }
       } else {
         log
