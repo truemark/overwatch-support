@@ -206,16 +206,12 @@ export class OverwatchSupportStack extends ExtendedStack {
       workspace: overwatchSupport.workspace,
     });
 
-    const prometheusEndpoint =
-      overwatchSupport.workspace.attrPrometheusEndpoint;
-    const prometheusEndpointRemoteWrite = prometheusEndpoint.endsWith('/')
-      ? prometheusEndpoint.slice(0, -1)
-      : prometheusEndpoint;
+    const prometheusRegion = Stack.of(this).region;
     new OtelSupportConstruct(this, 'OtelSupportConstruct', {
       parameterName: '/app/global/otel',
       parameterDescription: 'Global OpenTelemetry configuration',
-      region: Stack.of(this).region,
-      prometheusEndpoint: `${prometheusEndpointRemoteWrite}/api/v1/remote_write`,
+      region: prometheusRegion,
+      prometheusEndpoint: `https://aps-workspaces.${prometheusRegion}.amazonaws.com/workspaces/${overwatchSupport.workspace.attrWorkspaceId}/api/v1/remote_write`,
     });
   }
 
