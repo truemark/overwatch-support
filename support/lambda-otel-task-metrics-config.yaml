@@ -1,0 +1,42 @@
+extensions:
+  sigv4auth:
+    region: ${REGION}
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 127.0.0.1:4317
+      http:
+        endpoint: 127.0.0.1:4318
+
+exporters:
+  awsxray:
+  awsemf/application:
+    namespace: ${APPLICATION_METRICS_NAMESPACE}
+    dimension_rollup_option: NoDimensionRollup
+    resource_to_telemetry_conversion:
+      enabled: true
+  prometheusremotewrite/application:
+    endpoint: ${AWS_PROMETHEUS_ENDPOINT}
+    auth:
+      authenticator: sigv4auth
+    namespace: "adot"
+    resource_to_telemetry_conversion:
+      enabled: true
+    external_labels:
+      namespace: ${SERVICE_NAME}-lambda
+
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [awsxray]
+
+    metrics/application:
+      receivers: [otlp]
+      exporters: [prometheusremotewrite/application,awsemf/application]
+  extensions: [sigv4auth]

@@ -2,11 +2,12 @@ import * as fs from 'fs';
 import * as path from 'node:path';
 
 export function getOtelCollectorConfig(
+  fileName: string,
   region?: string,
   prometheusEndPoint?: string
 ): string {
   let yamlTemplate = fs.readFileSync(
-    path.resolve(__dirname, '../../support/ecs-otel-task-metrics-config.yaml'),
+    path.resolve(__dirname, `../../support/${fileName}`),
     'utf-8'
   );
 
