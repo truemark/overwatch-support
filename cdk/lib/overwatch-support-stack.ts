@@ -210,7 +210,6 @@ export class OverwatchSupportStack extends ExtendedStack {
     new OtelSupportConstruct(this, 'OtelSupportConstruct', {
       parameterName: '/app/global/otel',
       parameterDescription: 'Global OpenTelemetry configuration',
-      region: prometheusRegion,
       prometheusEndpoint: `https://aps-workspaces.${prometheusRegion}.amazonaws.com/workspaces/${overwatchSupport.workspace.attrWorkspaceId}/api/v1/remote_write`,
     });
   }
