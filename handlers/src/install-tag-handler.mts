@@ -24,28 +24,41 @@ async function isInstanceSSMReachable(
 
   while (retries < MAX_RETRIES) {
     try {
-      const command = new DescribeInstanceInformationCommand({});
-      const response = await ssmClient.send(command);
-
-      const instanceInfo = response.InstanceInformationList?.find(
-        (instance) =>
-          instance.InstanceId === instanceId &&
-          instance.PingStatus === 'Online',
+      const response = await ssmClient.send(
+        new DescribeInstanceInformationCommand({
+          Filters: [
+            {
+              Key: 'InstanceIds',
+              Values: [instanceId],
+            },
+          ],
+        }),
       );
 
-      if (instanceInfo) {
+      const instanceInfo = response.InstanceInformationList?.[0];
+
+      if (instanceInfo?.PingStatus === 'Online') {
+        log
+          .debug()
+          .str('instanceId', instanceId)
+          .msg(`Instance is reachable via SSM`);
         return true;
       }
 
       log
-        .trace()
+        .debug()
         .str('instanceId', instanceId)
-        .msg(`Instance is not reachable. Retrying...`);
+        .str('pingStatus', instanceInfo?.PingStatus ?? 'Unknown')
+        .msg(`Instance not reachable. Retrying...`);
     } catch (error) {
-      log.warn().err(error).msg(`Failed checking instance status.`);
+      log
+        .warn()
+        .err(error)
+        .str('instanceId', instanceId)
+        .msg(`Failed checking instance status`);
     }
 
-    retries += 1;
+    retries++;
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
   }
 
@@ -86,14 +99,25 @@ export const handler: EventBridgeHandler<string, string, void> = async (
       const ssmClient = new SSMClient({region: process.env.AWS_DEFAULT_REGION});
 
       if (await isInstanceSSMReachable(ssmClient, instanceId!)) {
-        const tagValue = event.detail.tags['overwatch:install'];
+        const tagValue = event.detail.tags['overwatch:install']
+          ?.trim()
+          .toLowerCase();
+
+        if (typeof tagValue !== 'string') {
+          log
+            .warn()
+            .msg("Required tag 'overwatch:install' is missing or not a string");
+          return;
+        }
+
         const commands: string[] = [];
         const documentParameters: {[key: string]: SSMParameters} = {};
 
         if (
-          tagValue === 'all' ||
-          (tagValue.includes('node-exporter') &&
-            tagValue.includes('fluent-bit'))
+          tagValue &&
+          (tagValue === 'all' ||
+            (tagValue.includes('node-exporter') &&
+              tagValue.includes('fluent-bit')))
         ) {
           commands.push('InstallNodeExporter', 'InstallFluentBit');
         } else if (tagValue.includes('node-exporter')) {
