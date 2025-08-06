@@ -77,7 +77,7 @@ cat /etc/yum.repos.d/fluent-bit.repo
 $INSTALL_CMD_PREFIX yum -y $YUM_PARAMETERS install $INSTALL_PACKAGE_NAME$YUM_VERSION
 SCRIPT
     ;;
-    centos|centoslinux|rhel|redhatenterpriselinuxserver|fedora|rocky|almalinux)
+    centos|centoslinux|rhel|redhatenterpriselinuxserver|fedora|rocky|almalinux|ol)
         $SUDO sh <<SCRIPT
 rpm --import $RELEASE_KEY
 cat << EOF > /etc/yum.repos.d/fluent-bit.repo
