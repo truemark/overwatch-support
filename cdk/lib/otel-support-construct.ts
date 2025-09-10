@@ -38,8 +38,8 @@ export class OtelSupportConstruct extends ExtendedConstruct {
         configType === 'ECS'
           ? props.parameterName
           : `${props.parameterName}/${configType.toLowerCase()}`;
-
-      new StringParameter(this, `OtelConfigParameter${configType}`, {
+      const parameterIdSuffix = configType === 'ECS' ? '' : `${configType}`;
+      new StringParameter(this, `OtelConfigParameter${parameterIdSuffix}`, {
         parameterName,
         stringValue: configContent,
         description: `${props.parameterDescription} - ${configType}`,
