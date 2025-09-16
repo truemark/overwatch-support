@@ -106,7 +106,9 @@ export const handler: EventBridgeHandler<string, string, void> = async (
         if (typeof tagValue !== 'string') {
           log
             .warn()
-            .msg("Required tag 'overwatch:install' is missing or not a string");
+            .msg(
+              "Required tag 'overwatch:install' is missing or not a stsring",
+            );
           return;
         }
 
