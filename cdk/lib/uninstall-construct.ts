@@ -1,11 +1,13 @@
 import {Construct} from 'constructs';
 import {CfnDocument} from 'aws-cdk-lib/aws-ssm';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export class UninstallConstruct extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // CloudWatch Agent
+    // CloudWatch Agent — Distributor uninstall
     const cwDoc = {
       schemaVersion: '2.2',
       description:
@@ -31,6 +33,32 @@ export class UninstallConstruct extends Construct {
     });
 
     // node_exporter / windows_exporter
+    const nodeExporterLinuxUninstall = fs
+      .readFileSync(
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'support',
+          'node_exporter_uninstall.sh'
+        ),
+        'utf-8'
+      )
+      .split('\n');
+
+    const windowsExporterUninstall = fs
+      .readFileSync(
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'support',
+          'windows_exporter_uninstall.ps1'
+        ),
+        'utf-8'
+      )
+      .split('\n');
+
     const nodeDoc = {
       schemaVersion: '2.2',
       description:
@@ -43,24 +71,7 @@ export class UninstallConstruct extends Construct {
           precondition: {StringEquals: ['platformType', 'Linux']},
           inputs: {
             timeoutSeconds: '1200',
-            runCommand: [
-              '#!/bin/bash',
-              'set -euo pipefail',
-              'echo "Stopping node_exporter service..."',
-              'systemctl stop node_exporter 2>/dev/null || true',
-              'systemctl disable node_exporter 2>/dev/null || true',
-              'rm -f /etc/systemd/system/node_exporter.service 2>/dev/null || true',
-              'rm -f /usr/lib/systemd/system/node_exporter.service 2>/dev/null || true',
-              'systemctl daemon-reload 2>/dev/null || true',
-              'systemctl reset-failed 2>/dev/null || true',
-              'echo "Removing node_exporter files..."',
-              'rm -rf /etc/prometheus/node_exporter 2>/dev/null || true',
-              'rm -rf /opt/node_exporter 2>/dev/null || true',
-              'rm -f /usr/local/bin/node_exporter 2>/dev/null || true',
-              'userdel -r prometheus 2>/dev/null || true',
-              'groupdel prometheus 2>/dev/null || true',
-              'echo "node_exporter uninstallation completed"',
-            ],
+            runCommand: nodeExporterLinuxUninstall,
           },
         },
         {
@@ -69,21 +80,7 @@ export class UninstallConstruct extends Construct {
           precondition: {StringEquals: ['platformType', 'Windows']},
           inputs: {
             timeoutSeconds: '1200',
-            runCommand: [
-              "$ErrorActionPreference = 'Continue'",
-              'Write-Host "Stopping windows_exporter service..."',
-              'Stop-Service -Name "windows_exporter" -ErrorAction SilentlyContinue',
-              'Start-Sleep -Seconds 3',
-              'sc.exe delete windows_exporter 2>$null',
-              'Write-Host "Removing windows_exporter files..."',
-              'Remove-Item -Recurse -Force "C:\\Program Files\\windows_exporter" -ErrorAction SilentlyContinue',
-              'Remove-Item -Recurse -Force "C:\\windows_exporter" -ErrorAction SilentlyContinue',
-              'Remove-Item -Recurse -Force "$env:ProgramData\\windows_exporter" -ErrorAction SilentlyContinue',
-              'Write-Host "Removing firewall rule..."',
-              'netsh advfirewall firewall delete rule name="windows_exporter" dir=in 2>$null',
-              'netsh advfirewall firewall delete rule name="windows_exporter 9182" dir=in 2>$null',
-              'Write-Host "windows_exporter uninstallation completed"',
-            ],
+            runCommand: windowsExporterUninstall,
           },
         },
       ],
@@ -97,6 +94,32 @@ export class UninstallConstruct extends Construct {
     });
 
     // Fluent Bit
+    const fluentBitLinuxUninstall = fs
+      .readFileSync(
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'support',
+          'fluent-bit-linux-uninstall.sh'
+        ),
+        'utf-8'
+      )
+      .split('\n');
+
+    const fluentBitWindowsUninstall = fs
+      .readFileSync(
+        path.join(
+          __dirname,
+          '..',
+          '..',
+          'support',
+          'fluent-bit-windows-uninstall.ps1'
+        ),
+        'utf-8'
+      )
+      .split('\n');
+
     const fbDoc = {
       schemaVersion: '2.2',
       description: 'Uninstall Fluent Bit (Linux/Windows).',
@@ -108,32 +131,7 @@ export class UninstallConstruct extends Construct {
           precondition: {StringEquals: ['platformType', 'Linux']},
           inputs: {
             timeoutSeconds: '1200',
-            runCommand: [
-              '#!/bin/bash',
-              'set -euo pipefail',
-              'echo "Stopping Fluent Bit service..."',
-              'systemctl stop fluent-bit 2>/dev/null || true',
-              'systemctl stop td-agent-bit 2>/dev/null || true',
-              'systemctl disable fluent-bit 2>/dev/null || true',
-              'systemctl disable td-agent-bit 2>/dev/null || true',
-              'echo "Removing Fluent Bit packages..."',
-              'if command -v dnf >/dev/null 2>&1; then',
-              '  dnf remove -y fluent-bit td-agent-bit 2>/dev/null || true',
-              'elif command -v yum >/dev/null 2>&1; then',
-              '  yum remove -y fluent-bit td-agent-bit 2>/dev/null || true',
-              'elif command -v apt-get >/dev/null 2>&1; then',
-              '  apt-get remove -y fluent-bit td-agent-bit 2>/dev/null || true',
-              '  apt-get autoremove -y 2>/dev/null || true',
-              'fi',
-              'echo "Cleaning up files..."',
-              'rm -rf /etc/fluent-bit /etc/td-agent-bit 2>/dev/null || true',
-              'rm -rf /var/lib/fluent-bit /var/log/fluent-bit 2>/dev/null || true',
-              'rm -f /etc/systemd/system/fluent-bit.service 2>/dev/null || true',
-              'rm -f /etc/systemd/system/td-agent-bit.service 2>/dev/null || true',
-              'systemctl daemon-reload 2>/dev/null || true',
-              'systemctl reset-failed 2>/dev/null || true',
-              'echo "Fluent Bit uninstallation completed"',
-            ],
+            runCommand: fluentBitLinuxUninstall,
           },
         },
         {
@@ -142,19 +140,7 @@ export class UninstallConstruct extends Construct {
           precondition: {StringEquals: ['platformType', 'Windows']},
           inputs: {
             timeoutSeconds: '1200',
-            runCommand: [
-              "$ErrorActionPreference = 'Continue'",
-              'Write-Host "Stopping Fluent Bit service..."',
-              'Stop-Service -Name "fluent-bit" -ErrorAction SilentlyContinue',
-              'Start-Sleep -Seconds 3',
-              'sc.exe delete fluent-bit 2>$null',
-              'Write-Host "Removing Fluent Bit files..."',
-              'Remove-Item -Recurse -Force "C:\\Program Files\\FluentBit" -ErrorAction SilentlyContinue',
-              'Remove-Item -Recurse -Force "C:\\fluent-bit" -ErrorAction SilentlyContinue',
-              'Remove-Item -Recurse -Force "$env:ProgramData\\FluentBit" -ErrorAction SilentlyContinue',
-              'Remove-Item -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\fluent-bit" -Recurse -ErrorAction SilentlyContinue',
-              'Write-Host "Fluent Bit uninstallation completed"',
-            ],
+            runCommand: fluentBitWindowsUninstall,
           },
         },
       ],
