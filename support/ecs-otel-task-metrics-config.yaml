@@ -261,7 +261,7 @@ service:
     metrics/application:
       receivers: [otlp, statsd]
       processors: [resourcedetection,batch/metrics]
-      exporters: [prometheusremotewrite/application, awsemf/application]
+      exporters: [prometheusremotewrite/application]
     metrics/ecs:
       receivers: [awsecscontainermetrics]
       processors: [filter, metricstransform, resource]
