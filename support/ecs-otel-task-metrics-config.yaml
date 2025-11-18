@@ -179,6 +179,7 @@ processors:
           - '^aspnetcore\..*'
           - '^dns\..*'
           - '^process\..*'
+          - '^database_execute$'
 exporters:
   awsxray:
     index_all_attributes: true
@@ -188,17 +189,6 @@ exporters:
     dimension_rollup_option: NoDimensionRollup
     resource_to_telemetry_conversion:
       enabled: true
-  awsemf/ecs:
-    namespace: ECS/ContainerInsights
-    log_group_name: /aws/ecs/containerinsights/{ClusterName}/performance
-    log_stream_name: "{TaskId}"
-    resource_to_telemetry_conversion:
-      enabled: true
-    dimension_rollup_option: NoDimensionRollup
-    metric_declarations:
-      - dimensions: [[ClusterName], [ClusterName, TaskDefinitionFamily], [ClusterName, TaskDefinitionFamily, TaskId]]
-        metric_name_selectors: [MemoryUtilized, MemoryReserved, CpuUtilized, CpuReserved, NetworkRxBytes, NetworkTxBytes, StorageReadBytes, StorageWriteBytes]
-      - metric_name_selectors: [container.*]
   prometheusremotewrite/application:
     endpoint: ${AWS_PROMETHEUS_ENDPOINT}
     auth:
