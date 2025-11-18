@@ -7,7 +7,6 @@ extensions:
       exporter_failure_threshold: 5
   sigv4auth:
     region: ${REGION}
-
 receivers:
   otlp:
     protocols:
@@ -21,40 +20,16 @@ receivers:
     endpoint: 127.0.0.1:8125
     aggregation_interval: 60s
   awsecscontainermetrics:
-
-
-
 processors:
-  resource/otel:
-    attributes:
-      - key: test.inject
-        value: "added by resource processor"
-        action: insert
   resourcedetection:
-    detectors:
-      - env
-      - system
-      - ecs
-      - ec2
-  batch/traces:
-    timeout: 1s
-    send_batch_size: 50
+    detectors: [env, system, ecs, ec2]
   batch/metrics:
     timeout: 60s
   filter:
     metrics:
       include:
         match_type: strict
-        metric_names:
-          - ecs.task.memory.reserved
-          - ecs.task.memory.utilized
-          - ecs.task.cpu.reserved
-          - ecs.task.cpu.utilized
-          - ecs.task.network.rate.rx
-          - ecs.task.network.rate.tx
-          - ecs.task.storage.read_bytes
-          - ecs.task.storage.write_bytes
-          - container.duration
+        metric_names: [ecs.task.memory.reserved, ecs.task.memory.utilized, ecs.task.cpu.reserved, ecs.task.cpu.utilized, ecs.task.network.rate.rx, ecs.task.network.rate.tx, ecs.task.storage.read_bytes, ecs.task.storage.write_bytes, container.duration]
   metricstransform:
     transforms:
       - include: ecs.task.memory.utilized
@@ -81,8 +56,6 @@ processors:
       - include: ecs.task.storage.write_bytes
         action: update
         new_name: StorageWriteBytes
-
-
   resource:
     attributes:
       - key: ClusterName
@@ -195,7 +168,17 @@ processors:
         action: insert
       - key: container.image.tag
         action: delete
-
+  filter/cw_exclude:
+    error_mode: ignore
+    metrics:
+      exclude:
+        match_type: regexp
+        metric_names:
+          - '^http\..*'
+          - '^kestrel\..*'
+          - '^aspnetcore\..*'
+          - '^dns\..*'
+          - '^process\..*'
 exporters:
   awsxray:
     index_all_attributes: true
@@ -205,8 +188,6 @@ exporters:
     dimension_rollup_option: NoDimensionRollup
     resource_to_telemetry_conversion:
       enabled: true
-
-
   awsemf/ecs:
     namespace: ECS/ContainerInsights
     log_group_name: /aws/ecs/containerinsights/{ClusterName}/performance
@@ -216,55 +197,45 @@ exporters:
     dimension_rollup_option: NoDimensionRollup
     metric_declarations:
       - dimensions: [[ClusterName], [ClusterName, TaskDefinitionFamily], [ClusterName, TaskDefinitionFamily, TaskId]]
-        metric_name_selectors:
-          - MemoryUtilized
-          - MemoryReserved
-          - CpuUtilized
-          - CpuReserved
-          - NetworkRxBytes
-          - NetworkTxBytes
-          - StorageReadBytes
-          - StorageWriteBytes
+        metric_name_selectors: [MemoryUtilized, MemoryReserved, CpuUtilized, CpuReserved, NetworkRxBytes, NetworkTxBytes, StorageReadBytes, StorageWriteBytes]
       - metric_name_selectors: [container.*]
-
   prometheusremotewrite/application:
     endpoint: ${AWS_PROMETHEUS_ENDPOINT}
     auth:
       authenticator: sigv4auth
-    namespace: "adot"
+    namespace: adot
     resource_to_telemetry_conversion:
       enabled: true
     external_labels:
       cluster: ${CLUSTER_NAME}
       namespace: ${SERVICE_NAME}-application
-
-
   prometheusremotewrite/ecs:
     endpoint: ${AWS_PROMETHEUS_ENDPOINT}
     auth:
       authenticator: sigv4auth
-    namespace: "ecs"
+    namespace: ecs
     external_labels:
       cluster: ${CLUSTER_NAME}
       namespace: ${SERVICE_NAME}-ecs
-
-
 service:
   telemetry:
     logs:
       level: info
   pipelines:
     traces:
-      receivers: [otlp,awsxray]
+      receivers: [otlp, awsxray]
       processors: [resourcedetection, batch/metrics]
       exporters: [awsxray]
-    metrics/application:
+    metrics/application_amp:
       receivers: [otlp, statsd]
-      processors: [resourcedetection,batch/metrics]
+      processors: [resourcedetection, batch/metrics]
       exporters: [prometheusremotewrite/application]
+    metrics/application_cw:
+      receivers: [otlp, statsd]
+      processors: [resourcedetection, filter/cw_exclude, batch/metrics]
+      exporters: [awsemf/application]
     metrics/ecs:
       receivers: [awsecscontainermetrics]
       processors: [filter, metricstransform, resource]
       exporters: [prometheusremotewrite/ecs]
-
-  extensions: [health_check,sigv4auth]
+  extensions: [health_check, sigv4auth]
