@@ -10,6 +10,7 @@ import {
   Role,
 } from 'aws-cdk-lib/aws-iam';
 import {InstallConstruct} from './install-construct';
+import {UninstallConstruct} from './uninstall-construct';
 import {OtelSupportConstruct} from './otel-support-construct';
 
 export interface OverwatchSupportStackProps extends ExtendedStackProps {
@@ -205,6 +206,7 @@ export class OverwatchSupportStack extends ExtendedStack {
     new InstallConstruct(this, 'Install', {
       workspace: overwatchSupport.workspace,
     });
+    new UninstallConstruct(this, 'UnInstall');
 
     const prometheusRegion = Stack.of(this).region;
     new OtelSupportConstruct(this, 'OtelSupportConstruct', {

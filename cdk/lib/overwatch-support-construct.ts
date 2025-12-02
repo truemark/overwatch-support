@@ -10,10 +10,11 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import {AlertsTopic} from 'truemark-cdk-lib/aws-centergauge';
 import {InstallTagFunction} from './install-tag-function';
+import {UnInstallTagFunction} from './uninstall-tag-function';
 import * as path from 'path';
 import * as fs from 'fs';
 import {Stack} from 'aws-cdk-lib';
-import {Alias, IKey} from 'aws-cdk-lib/aws-kms';
+import {Alias} from 'aws-cdk-lib/aws-kms';
 
 /**
  * Handles the creation of primary services used in Overwatch. (Prometheus,producer and IAM roles)
@@ -117,5 +118,6 @@ export class OverwatchSupportConstruct extends Construct {
     });
 
     new InstallTagFunction(this, 'InstallTagFunction');
+    new UnInstallTagFunction(this, 'UnInstallTagFunction');
   }
 }
