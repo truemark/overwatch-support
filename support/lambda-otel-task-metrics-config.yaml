@@ -38,5 +38,5 @@ service:
 
     metrics/application:
       receivers: [otlp]
-      exporters: [prometheusremotewrite/application,awsemf/application]
+      exporters: [prometheusremotewrite/application]
   extensions: [sigv4auth]
