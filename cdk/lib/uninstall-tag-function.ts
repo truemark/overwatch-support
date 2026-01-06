@@ -8,15 +8,22 @@ import {LambdaFunction} from 'aws-cdk-lib/aws-events-targets';
 import {Rule} from 'aws-cdk-lib/aws-events';
 import * as iam from 'aws-cdk-lib/aws-iam';
 
-export class InstallTagFunction extends ExtendedNodejsFunction {
+export class UnInstallTagFunction extends ExtendedNodejsFunction {
   constructor(scope: Construct, id: string) {
-    const role = new iam.Role(scope, 'Role', {
+    const role = new iam.Role(scope, 'UninstallRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
 
     role.addToPolicy(
       new iam.PolicyStatement({
         actions: ['ssm:SendCommand', 'ssm:DescribeInstanceInformation'],
+        resources: ['*'],
+      })
+    );
+
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['cloudtrail:LookupEvents'],
         resources: ['*'],
       })
     );
@@ -33,12 +40,12 @@ export class InstallTagFunction extends ExtendedNodejsFunction {
         '..',
         'handlers',
         'src',
-        'install-tag-handler.mts'
+        'uninstall-tag-handler.mts'
       ),
       architecture: Architecture.ARM_64,
       handler: 'handler',
       role: role,
-      timeout: Duration.minutes(10),
+      timeout: Duration.minutes(15),
       deploymentOptions: {
         createDeployment: false,
       },
@@ -48,28 +55,22 @@ export class InstallTagFunction extends ExtendedNodejsFunction {
       },
     });
 
-    const deadLetterQueue = new StandardQueue(this, 'InstallDlq'); // TODO Add alerting around this
+    const deadLetterQueue = new StandardQueue(this, 'UninstallDlq');
+    const target = new LambdaFunction(this, {deadLetterQueue});
 
-    const target = new LambdaFunction(this, {
-      deadLetterQueue,
-    });
-
-    const tagRule = new Rule(this, 'TagRule', {
+    // CloudTrail Rule for tag DELETIONS
+    const deleteTagRule = new Rule(this, 'DeleteTagRule', {
       eventPattern: {
-        source: ['aws.tag'],
-        detailType: ['Tag Change on Resource'],
+        source: ['aws.ec2'],
+        detailType: ['AWS API Call via CloudTrail'],
         detail: {
-          service: ['ec2'],
-          'resource-type': ['instance'],
-          'changed-tag-keys': ['overwatch:install'],
-          tags: {
-            'overwatch:install': [{prefix: ''}],
-          },
+          eventSource: ['ec2.amazonaws.com'],
+          eventName: ['DeleteTags'],
         },
       },
       description:
-        'Routes tag ADD/UPDATE events (not deletions) to the install handler',
+        'Routes tag deletion events to the Overwatch Uninstall Tag Function',
     });
-    tagRule.addTarget(target);
+    deleteTagRule.addTarget(target);
   }
 }
